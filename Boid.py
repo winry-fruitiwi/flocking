@@ -37,7 +37,7 @@ class Boid(object): # if we want to inherit
     # makes the velocity equal to the average velocity of each boid
     def align(self, boids):
         # we want 3 variables to describe what our function will do...
-        perception_radius = 20 # you do not want a flock with a million boids.
+        perception_radius = 30 # you do not want a flock with a million boids.
         average = PVector() # we just want to start with an empty slate!
         total = 0 # keep track of how many boids we have
 
@@ -65,13 +65,44 @@ class Boid(object): # if we want to inherit
 
     # makes everyone call their flocking functions.
     def flock(self, boids):
+        # aligns the flock
         alignment = self.align(boids)
         self.apply_force(alignment)
+        
+        # makes the flock cohere
+        coherence = self.cohere(boids)
+        self.apply_force(coherence)
 
 
     # makes the boid go close to the average position
     def cohere(self, boids):
-        pass
+        # we want 3 variables to describe what our function will do...
+        perception_radius = 40 # you do not want a flock with a million boids.
+        average = PVector() # we just want to start with an empty slate!
+        total = 0 # keep track of how many boids we have
+
+        # now loop through every boid...
+        for boid in boids:
+            # now check if they're within a certain perception radius. If distance = 0,
+            # we're either in a rare case where the boid is right on us or it's just us.
+            distance = dist(self.pos.x, self.pos.y, boid.pos.x, boid.pos.y)
+            if distance < perception_radius and distance > 0:
+                # if they are, add to the average and then divide it later.
+                average.add(boid.pos)
+                total += 1
+
+        if total > 0:
+            average.div(total)
+
+        else:
+            return PVector(0, 0)
+
+        # desired_velocity = self.vel - target.vel
+        steering_force = PVector.sub(average, self.pos)
+        steering_force.setMag(self.max_speed)
+        steering_force.sub(self.vel)
+        steering_force.limit(self.max_force)
+        return steering_force
 
 
     # keeps the boid from crashing into another flockmate, especially to
