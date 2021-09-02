@@ -17,7 +17,8 @@ from Boid import * # an asterisk imports everything in a file or library
 def setup():
     global boids
     colorMode(HSB, 360, 100, 100, 100)
-    size(940, 1000)
+    size(640, 360)   
+    # size(640, 360)
     # background(220, 79, 35) # this won't stay here long because it's a test.
     boids = []
     for i in range(100):
@@ -34,3 +35,6 @@ def draw():
         boid.edges()
         boid.update()
         boid.show()
+    
+    fill(0, 0, 100)
+    text("{:.2f}".format(frameRate), 10, 10)
