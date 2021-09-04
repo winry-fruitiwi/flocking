@@ -30,8 +30,10 @@ def draw():
     background(220, 79, 35)
     gravity = PVector(0, 0.1)
     for boid in boids:
-        # boid.apply_force(gravity)
         boid.flock(boids)
+    
+    for boid in boids:
+        # boid.apply_force(gravity)
         boid.edges()
         boid.update()
         boid.show()
