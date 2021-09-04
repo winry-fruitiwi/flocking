@@ -43,7 +43,7 @@ class Boid(object): # if we want to inherit
 
 
     # makes the velocity equal to the average velocity of each boid
-    def align(self, boids):
+    def deprecated_align(self, boids):
         # we want 3 variables to describe what our function will do...
         perception_radius = 40 # you do not want a flock with a million boids.
         average = PVector() # we just want to start with an empty slate!
@@ -76,22 +76,8 @@ class Boid(object): # if we want to inherit
         return steering_force
 
 
-    # makes everyone call their flocking functions.
-    def flock(self, boids):
-        # aligns the flock
-        alignment = self.align(boids).mult(1)
-        self.apply_force(alignment)
-        
-        # # makes the flock cohere
-        coherence = self.cohere(boids).mult(1)
-        self.apply_force(coherence)
-        
-        separation = self.separate(boids).mult(1)
-        self.apply_force(separation)
-
-
     # makes the boid go close to the average position
-    def cohere(self, boids):
+    def deprecated_cohere(self, boids):
         # we want 3 variables to describe what our function will do...
         perception_radius = 40 # you do not want a flock with a million boids.
         average = PVector() # we just want to start with an empty slate!
@@ -125,7 +111,7 @@ class Boid(object): # if we want to inherit
 
     # keeps the boid from crashing into another flockmate, especially to
     # keep anyone from cracking each other's skulls.
-    def separate(self, boids):
+    def deprecated_separate(self, boids):
         # we want 3 variables to describe what our function will do...
         perception_radius = 30 # you do not want a flock with a million boids.
         average = PVector() # we just want to start with an empty slate!
@@ -156,6 +142,21 @@ class Boid(object): # if we want to inherit
         steering_force.sub(self.vel)
         steering_force.limit(self.max_force)
         return steering_force.mult(1.5)
+    
+    
+    # makes everyone call their flocking functions.
+    # def flock(self, boids): # deprecated for now.
+    #     # aligns the flock
+    #     alignment = self.align(boids).mult(1)
+    #     self.apply_force(alignment)
+        
+    #     # makes the flock cohere
+    #     coherence = self.cohere(boids).mult(1)
+    #     self.apply_force(coherence)
+        
+    #     separation = self.separate(boids).mult(1)
+    #     self.apply_force(separation)
+
 
     # want to kiss goodbye to a flock forever? No! You want to keep them around!
     def edges(self):
