@@ -21,7 +21,7 @@ def setup():
     # size(640, 360)
     # background(220, 79, 35) # this won't stay here long because it's a test.
     boids = []
-    for i in range(10):
+    for i in range(100):
         boids.append(Boid(random(width), random(height)))
 
 
@@ -30,14 +30,16 @@ def draw():
     background(220, 79, 35)
     gravity = PVector(0, 0.1)
     for boid in boids:
-        boid.apply_force(boid.seek(PVector(mouseX, mouseY)))
+        target = PVector(mouseX, mouseY)
+        desired_velocity = PVector.sub(target, boid.pos)
+        boid.apply_force(boid.velocity_seek(desired_velocity))
         # boid.flock(boids)
     
     for boid in boids:
         # boid.apply_force(gravity)
+        boid.show()
         boid.edges()
         boid.update()
-        boid.show()
     
     fill(0, 0, 100)
     text("{:.2f}".format(frameRate), 10, 10)

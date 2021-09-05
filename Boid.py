@@ -42,12 +42,29 @@ class Boid(object): # if we want to inherit
         popMatrix()
 
     
-    # this is very similar to the seek found in other Autonomous Characters
-    # papers from Craig Reynolds, except we don't have that position subtract!
+    # this creates a correction force that returns a force  vector at the end
     def seek(self, target): # target is a PVector
         steering_force = PVector.sub(target, self.pos)
         steering_force.setMag(self.max_speed)
         # steering_force = desired_velocity - current_velocity
+        
+        # we want to get to the target as fast as possible, but we're heading
+        # the wrong way. To correct this, we want a steering with the opposite
+        # angle relative to the target so that we can go in a relatively
+        # straight line.
+        steering_force.sub(self.vel)
+        steering_force.limit(self.max_force)
+        return steering_force
+    
+    
+    # this is very similar to the seek found in other Autonomous Characters
+    # papers from Craig Reynolds, except we don't have that position subtract!
+    # The second argument is the result of the first line in the
+    def velocity_seek(self, desired_velocity): # desired_velocity is a PVector
+        # normally we'd have the error correction step, but we don't need that anymore
+        # because we're already including it in desired_velocity!
+        # steering_force = desired_velocity - current_velocity
+        steering_force = desired_velocity.setMag(self.max_speed)
         
         # we want to get to the target as fast as possible, but we're heading
         # the wrong way. To correct this, we want a steering with the opposite
