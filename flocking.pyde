@@ -7,10 +7,10 @@
 # Version comments:
 # v0.00:  These version comments
 # v0.01:  Shell, new tab, Boid class
-# v0.0 :  Alignment
-# v0.0 :  Cohesion
-# v0.0 :  Separation
-# v0.0 :  Maybe refactor code into a Flock class and use quadtrees?
+# v0.02:  Alignment
+# v0.03:  Cohesion
+# v0.04:  Separation
+# v0.05:  Maybe refactor code into a Flock class and use quadtrees?
 from Boid import * # an asterisk imports everything in a file or library
 
 
@@ -31,9 +31,9 @@ def draw():
     gravity = PVector(0, 0.1)
     for boid in boids:
         target = PVector(mouseX, mouseY)
-        desired_velocity = PVector.sub(target, boid.pos)
-        boid.apply_force(boid.velocity_seek(desired_velocity))
-        # boid.flock(boids)
+        # desired_velocity = PVector.sub(target, boid.pos)
+        # boid.apply_force(boid.velocity_seek(desired_velocity))
+        boid.flock(boids)
     
     for boid in boids:
         # boid.apply_force(gravity)

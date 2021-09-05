@@ -177,18 +177,41 @@ class Boid(object): # if we want to inherit
         return steering_force.mult(1.5)
     
     
+    # makes each boid match velocities with local flockmates
+    def align(self, boids):
+        # without the word "local" we'd be matching forever!
+        perception_radius = 40
+        # to keep track of the average
+        average = PVector()
+        # how many boids did we visit?
+        total = 0
+        
+        for boid in boids:
+            distance = PVector.dist(self.pos, boid.pos)
+            if distance <= perception_radius and boid != self:
+                total += 1 # divide the average by this later
+                average.add(boid.vel)
+        
+        # after all that is done, we call seek_velocity!
+        if total > 0:
+            steering_force = average.div(total)
+            return self.velocity_seek(steering_force)
+        else:
+            return PVector()
+    
+    
     # makes everyone call their flocking functions.
-    # def flock(self, boids): # deprecated for now.
-    #     # aligns the flock
-    #     alignment = self.align(boids).mult(1)
-    #     self.apply_force(alignment)
+    def flock(self, boids):
+        # aligns the flock
+        alignment = self.align(boids).mult(1)
+        self.apply_force(alignment)
         
-    #     # makes the flock cohere
-    #     coherence = self.cohere(boids).mult(1)
-    #     self.apply_force(coherence)
+        # # makes the flock cohere
+        # coherence = self.cohere(boids).mult(1)
+        # self.apply_force(coherence)
         
-    #     separation = self.separate(boids).mult(1)
-    #     self.apply_force(separation)
+        # separation = self.separate(boids).mult(1)
+        # self.apply_force(separation)
 
 
     # want to kiss goodbye to a flock forever? No! You want to keep them around!
