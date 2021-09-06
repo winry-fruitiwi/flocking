@@ -42,177 +42,129 @@ class Boid(object): # if we want to inherit
         popMatrix()
 
     
-    # this creates a correction force that returns a force  vector at the end
-    def seek(self, target): # target is a PVector
-        steering_force = PVector.sub(target, self.pos)
-        steering_force.setMag(self.max_speed)
-        # steering_force = desired_velocity - current_velocity
-        
-        # we want to get to the target as fast as possible, but we're heading
-        # the wrong way. To correct this, we want a steering with the opposite
-        # angle relative to the target so that we can go in a relatively
-        # straight line.
-        steering_force.sub(self.vel)
-        steering_force.limit(self.max_force)
-        return steering_force
-    
-    
-    # this is very similar to the seek found in other Autonomous Characters
-    # papers from Craig Reynolds, except we don't have that position subtract!
-    # The second argument is the result of the first line in the
-    def velocity_seek(self, desired_velocity): # desired_velocity is a PVector
-        # normally we'd have the error correction step, but we don't need that anymore
-        # because we're already including it in desired_velocity!
-        # steering_force = desired_velocity - current_velocity
-        steering_force = desired_velocity.setMag(self.max_speed)
-        
-        # we want to get to the target as fast as possible, but we're heading
-        # the wrong way. To correct this, we want a steering with the opposite
-        # angle relative to the target so that we can go in a relatively
-        # straight line.
-        steering_force.sub(self.vel)
-        steering_force.limit(self.max_force)
-        return steering_force
-    
-    
-    # makes the velocity equal to the average velocity of each boid
-    def deprecated_align(self, boids):
-        # we want 3 variables to describe what our function will do...
-        perception_radius = 40 # you do not want a flock with a million boids.
-        average = PVector() # we just want to start with an empty slate!
-        total = 0 # keep track of how many boids we have
-        # noFill()
-        # stroke(0, 0, 100, 80)
-        # circle(self.pos.x, self.pos.y, perception_radius*2)
-
-        # now loop through every boid...
-        for boid in boids:
-            # now check if they're within a certain perception radius. If distance = 0,
-            # we're either in a rare case where the boid is right on us or it's just us.
-            distance = dist(self.pos.x, self.pos.y, boid.pos.x, boid.pos.y)
-            if distance < perception_radius and distance > 0:
-                # if they are, add to the average and then divide it later.
-                average.add(boid.vel)
-                total += 1
-
-        if total > 0:
-            steering_force = average.div(total)
-
-        else:
-            return PVector(0, 0)
-
-        # desired_velocity = self.vel - target.vel
-        
-        steering_force.setMag(self.max_speed)
-        steering_force.sub(self.vel)
-        steering_force.limit(self.max_force)
-        return steering_force
-
-
-    # makes the boid go close to the average position
-    def deprecated_cohere(self, boids):
-        # we want 3 variables to describe what our function will do...
-        perception_radius = 40 # you do not want a flock with a million boids.
-        average = PVector() # we just want to start with an empty slate!
-        total = 0 # keep track of how many boids we have
-        # noFill()
-        # stroke(0, 0, 100, 80)
-        # circle(self.pos.x, self.pos.y, perception_radius*2)
-        # now loop through every boid...
-        for boid in boids:
-            # now check if they're within a certain perception radius. If distance = 0,
-            # we're either in a rare case where the boid is right on us or it's just us.
-            distance = dist(self.pos.x, self.pos.y, boid.pos.x, boid.pos.y)
-            if distance < perception_radius and distance > 0:
-                # if they are, add to the average and then divide it later.
-                average.add(boid.pos)
-                total += 1
-
-        if total > 0:
-            average.div(total)
-
-        else:
-            return PVector(0, 0)
-
-        # desired_velocity = self.vel - target.vel
-        steering_force = PVector.sub(average, self.pos)
-        steering_force.setMag(self.max_speed)
-        steering_force.sub(self.vel)
-        steering_force.limit(self.max_force)
-        return steering_force
-
-
-    # keeps the boid from crashing into another flockmate, especially to
-    # keep anyone from cracking each other's skulls.
-    def deprecated_separate(self, boids):
-        # we want 3 variables to describe what our function will do...
-        perception_radius = 30 # you do not want a flock with a million boids.
-        average = PVector() # we just want to start with an empty slate!
-        total = 0 # keep track of how many boids we have
-        # noFill()
-        # stroke(0, 0, 100, 80)
-        # circle(self.pos.x, self.pos.y, perception_radius*2)
-        # now loop through every boid...
-        for boid in boids:
-            # now check if they're within a certain perception radius. If distance = 0,
-            # we're either in a rare case where the boid is right on us or it's just us.
-            distance = dist(self.pos.x, self.pos.y, boid.pos.x, boid.pos.y)
-            if distance < perception_radius and distance > 0:
-                # if they are, add to the average and then divide it later.
-                difference = PVector.sub(self.pos, boid.pos)
-                difference.div(distance)
-                average.add(difference)
-                total += 1
-
-        if total > 0:
-            steering_force = average.div(total)
-
-        else:
-            return PVector(0, 0)
-
-        # desired_velocity = self.vel - target.vel
-        steering_force.setMag(self.max_speed)
-        steering_force.sub(self.vel)
-        steering_force.limit(self.max_force)
-        return steering_force.mult(1.5)
-    
-    
-    # makes each boid match velocities with local flockmates
-    def align(self, boids):
-        # without the word "local" we'd be matching forever!
-        perception_radius = 40
-        # to keep track of the average
-        average = PVector()
-        # how many boids did we visit?
-        total = 0
-        
-        for boid in boids:
-            distance = PVector.dist(self.pos, boid.pos)
-            if distance <= perception_radius and boid != self:
-                total += 1 # divide the average by this later
-                average.add(boid.vel)
-        
-        # after all that is done, we call seek_velocity!
-        if total > 0:
-            steering_force = average.div(total)
-            return self.velocity_seek(steering_force)
-        else:
-            return PVector()
-    
-    
     # makes everyone call their flocking functions.
-    def flock(self, boids):
+    def flock(self, boids): # deprecated for now.
         # aligns the flock
         alignment = self.align(boids).mult(1)
         self.apply_force(alignment)
         
-        # # makes the flock cohere
-        # coherence = self.cohere(boids).mult(1)
-        # self.apply_force(coherence)
+        # makes the flock cohere
+        coherence = self.cohere(boids).mult(1)
+        self.apply_force(coherence)
         
         # separation = self.separate(boids).mult(1)
         # self.apply_force(separation)
-
+    
+    
+    # the boid is looking for something but is going in the wrong direction.
+    # It needs a correction force to steer itself to the right place!
+    # Uses Craig Reynold's equation for steering behaviours,
+    # steering_force = desired_velocity - current_velocity
+    def seek(self, location): # target is a PVector location.
+        # The only difference between velocity_seek and normal seek is that
+        # we start with just a location, so we need a vector from our location
+        # to the argument. Then we simply call velocity_seek on it, and we're done!
+        velocity = PVector.sub(location, self.pos)
+        return self.velocity_seek(velocity)
+    
+    
+    # For this variation of seek, we don't care about positions.
+    # We just want a velocity, so throw that first statement of plain seek into the 
+    # trash can and finish the rest of the function!
+    def velocity_seek(self, velocity): # velocity is also a PVector velocity
+        # we omit the first line from seek and then everything else proceeds as usual.
+        # Now we want to move at our maximum velocity so we set the vector's
+        # magnitude to our max speed.
+        velocity.setMag(self.max_speed)
+        
+        # now, we use Craig Reynold's equation using the old velocity minus ours.
+        velocity.sub(self.vel)
+        
+        # Finally, we can turn this into what we interpret as a force vector
+        # by limiting this to the maximum force. Note that Python doesn't care about
+        # the type of PVector, it just cares that the object is a PVector.
+        velocity.setMag(self.max_force)
+        # We've finished all that hard work, and it's almost time to celebrate.
+        # One more statement 'till we can: return the fruit of our labour!
+        return velocity
+    
+    
+    # A duck-boid looks around and he wants to move the same direction as his local friends.
+    # This function handles all that and now the duck is satisfied!
+    def align(self, boids): # boids is a list filled with the duck's friends.
+        # the word "local" is very important in this format. Without that word,
+        # the system would no longer be natural because everyone would move in 
+        # the same direction. This means we need a perception radius!
+        perception_radius = 50
+        # the duck wants to move in the same direction as his local friends, so
+        # needs to move in their average direction.
+        average = PVector()
+        # we need to keep track of how many boids there are, or else our average
+        # would be more like total_velocity instead of average_velocity.
+        total = 0
+        
+        # now we loop through all the boids in the boids list
+        for boid in boids:
+            distance = PVector.dist(self.pos, boid.pos)
+            # if the boid is within the perception radius, we add its velocity
+            # to the average variable, then increment the total variable
+            if distance <= perception_radius and boid != self:
+                total += 1
+                average.add(boid.vel)
+        
+        if total > 0:
+            # we divide by the total to get the average heading. Since we have a velocity,
+            # we call seek_velocity and return that.
+            average.div(total)
+            return self.velocity_seek(average)
+        
+        else:
+            return PVector(0, 0) # this means we didn't find anything
+    
+    
+    # A penguin-boid needs to stay warm, and the best place for that is the middle
+    # of all the penguins. This function handles that.
+    def cohere(self, boids): # boids is a list of all the boid objects
+        pass
+        # we define the same variables as in align, except the average velocity
+        # is now an average position.
+        perception_radius = 50
+        average = PVector()
+        total = 0
+        # we do the same as in align
+        for boid in boids:
+            distance = PVector.dist(self.pos, boid.pos)
+            # we make the same check but add the position of the boid instead of
+            # its velocity.
+            if distance <= perception_radius and boid != self:
+                total += 1
+                average.add(boid.pos)
+        
+        # after dividing the average by the total we have a position so we call seek.
+        if total > 0:
+            average.div(total)
+            return self.seek(average) # because we have a position!
+        
+        else:
+            return PVector()
+        
+    
+    # A porcupine-boid has a lot of spines and doesn't want to injure his friends,
+    # so he gets away from them if they come too close.
+    def separate(self, boids):
+        pass
+        # all the same variables as in align!
+        
+        
+        
+        # now loop again
+        
+            # we make the same check but there's a trick now! We need a vector from
+            # our position to the other porcupine, then divide that by the distance.
+            # We add that to the average.
+        
+        # The tricky part is over. Now, we proceed as we did in align.
+    
 
     # want to kiss goodbye to a flock forever? No! You want to keep them around!
     def edges(self):

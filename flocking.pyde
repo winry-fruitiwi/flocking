@@ -10,7 +10,7 @@
 # v0.02:  Alignment
 # v0.03:  Cohesion
 # v0.04:  Separation
-# v0.05:  Maybe refactor code into a Flock class and use quadtrees?
+# v0.0 :  Maybe refactor code into a Flock class and use quadtrees?
 from Boid import * # an asterisk imports everything in a file or library
 
 
