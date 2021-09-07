@@ -52,8 +52,8 @@ class Boid(object): # if we want to inherit
         coherence = self.cohere(boids).mult(1)
         self.apply_force(coherence)
         
-        # separation = self.separate(boids).mult(1)
-        # self.apply_force(separation)
+        separation = self.separate(boids).mult(2)
+        self.apply_force(separation)
     
     
     # the boid is looking for something but is going in the wrong direction.
@@ -78,7 +78,7 @@ class Boid(object): # if we want to inherit
         velocity.setMag(self.max_speed)
         
         # now, we use Craig Reynold's equation using the old velocity minus ours.
-        velocity.sub(self.vel)
+        velocity = PVector.sub(velocity, self.vel)
         
         # Finally, we can turn this into what we interpret as a force vector
         # by limiting this to the maximum force. Note that Python doesn't care about
@@ -152,18 +152,34 @@ class Boid(object): # if we want to inherit
     # A porcupine-boid has a lot of spines and doesn't want to injure his friends,
     # so he gets away from them if they come too close.
     def separate(self, boids):
-        pass
         # all the same variables as in align!
-        
-        
+        perception_radius = 30
+        average = PVector()
+        total = 0
         
         # now loop again
-        
+        for boid in boids:
             # we make the same check but there's a trick now! We need a vector from
-            # our position to the other porcupine, then divide that by the distance.
+            # the other porcupine to us:
+            #    boid.pos - self.pos            
+            # then divide that by the distance
+            # this should be inversely proportional to the distance
+            # boids closer by exert greater repulsive force.
             # We add that to the average.
+            distance = PVector.dist(self.pos, boid.pos) # order does not matter for distance
+            if distance <= perception_radius and boid != self:
+                diff = PVector.sub(self.pos, boid.pos)
+                diff.div(distance)
+                average.add(diff)
+                total += 1
         
         # The tricky part is over. Now, we proceed as we did in align.
+        if total > 0:
+            average.div(total)
+            return self.velocity_seek(average)
+        
+        else:
+            return PVector(0, 0)
     
 
     # want to kiss goodbye to a flock forever? No! You want to keep them around!
