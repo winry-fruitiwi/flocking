@@ -52,6 +52,7 @@ class Boid(object): # if we want to inherit
         coherence = self.cohere(boids).mult(1)
         self.apply_force(coherence)
         
+        # keeps the flock separated and gives them breathing space
         separation = self.separate(boids).mult(2)
         self.apply_force(separation)
     
